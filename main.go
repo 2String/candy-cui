@@ -6,15 +6,16 @@ package main
 
 import (
 	//"fmt"
-	//"io"
+	"bufio"
 	"log"
 	//"strings"
+	"os"
 
 	"github.com/jroimartin/gocui"
 	"github.com/seaven/CLI/view/login"
+	"github.com/seaven/candy-cui/candy"
+	//"github.com/seaven/candy-cui/util/log"
 )
-
-
 
 //func cursorDown(g *gocui.Gui, v *gocui.View) error {
 //	if v != nil {
@@ -78,7 +79,6 @@ import (
 //	return gocui.ErrQuit
 //}
 //
-
 
 //func saveMain(g *gocui.Gui, v *gocui.View) error {
 //	f, err := ioutil..empFile("", "gocui_demo_")
@@ -154,18 +154,21 @@ import (
 //	return nil
 //}
 
-
-
 func main() {
 	g, err := gocui.NewGui()
 	if err != nil {
 		log.Panicln(err)
 	}
 	defer g.Close()
-
 	g.Cursor = true
 
-	// 程序首页 登录界面
+	// 初始化 candy 客户端
+	candy.CandyCUIClient = candy.NewCandyClient("127.0.0.1:9000", &candy.CuiHandler{})
+	if err := candy.CandyCUIClient.Start(); err != nil {
+		log.Panic(err)
+	}
+
+	// 加载程序首页 登录界面
 	g.SetManagerFunc(login.LayoutLogin)
 	if err := login.LoginKeybindings(g); err != nil {
 		log.Panicln(err)

@@ -1,0 +1,58 @@
+syntax = "proto3";
+package candy.meta;
+
+option go_package = "meta";
+
+import weak "gogoproto/gogo.proto";
+import "common.proto";
+
+/*
+   Notifer 通知服务
+   不合并到store上原因：
+   1.需要维护用户连入服务器信息（通常说的路由信息）
+   2.将来这里会开放更多功能,推送不同渠道
+
+   为什么用同步接口:
+   实现动态扩容，收缩需要外部感知内部状态
+ */
+service Notifer {
+    // Subscribe 用户上线，接受在线推送
+    rpc Subscribe(SubscribeRequest) returns (SubscribeResponse);
+
+    // UnSubscribe 用户下线，取消在线推送
+    rpc UnSubscribe(UnSubscribeRequest) returns (UnSubscribeResponse);
+
+
+    //Push store调用的接口.
+    rpc Push(PushRequest) returns (PushResponse);
+}
+
+
+
+//SubscribeRequest 订阅消息, Device使用的设备，Host从哪台gate上来
+message SubscribeRequest {
+    int64   ID      = 1; 
+    string  Device  = 2;
+    string  Host    = 3;
+    int64   Token   = 4;
+}
+
+//SubscribeResponse 可能返回节点错误或其它错误信息
+message SubscribeResponse {
+    ResponseHeader  header = 1;
+}
+
+//UnSubscribeRequest 取消订阅
+message UnSubscribeRequest {
+    int64   ID      = 1; 
+    string  Device  = 2;
+    string  Host    = 3;
+    int64   Token   = 4;
+}
+
+//UnSubscribeResponse 可能返回节点错误或其它错误信息
+message UnSubscribeResponse {
+    ResponseHeader header = 1;
+}
+
+

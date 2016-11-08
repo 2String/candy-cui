@@ -1,0 +1,257 @@
+syntax = "proto3";
+package candy.meta;
+
+option go_package = "meta";
+
+import weak "gogoproto/gogo.proto";
+import "common.proto";
+
+service Store {
+    rpc Register(StoreRegisterRequest) returns (StoreRegisterResponse);
+    // UpdateUserInfo 更新用户信息 昵称-头像
+    rpc UpdateUserInfo(StoreUpdateUserInfoRequest) returns (StoreUpdateUserInfoResponse);
+
+    // UpdateSignature 更新签名
+    rpc UpdateSignature(StoreUpdateSignatureRequest) returns (StoreUpdateSignatureResponse);
+
+    // UpdateUserPassword 更新用户密码
+    rpc UpdateUserPassword(StoreUpdateUserPasswordRequest) returns (StoreUpdateUserPasswordResponse);
+
+    rpc GetUserInfo(StoreGetUserInfoRequest) returns (StoreGetUserInfoResponse);
+
+    rpc Auth(StoreAuthRequest) returns (StoreAuthResponse);
+
+    // Friend 好友服务
+    rpc Friend(StoreFriendRequest) returns (StoreFriendResponse);
+
+    // LoadFriendList 获取好友列表
+    rpc LoadFriendList(StoreLoadFriendListRequest) returns (StoreLoadFriendListResponse);
+
+    // FindUser 根据字符串的用户名模糊查用户列表
+    rpc FindUser(StoreFindUserRequest) returns (StoreFindUserResponse);
+
+    // GroupCreate 创建群
+    rpc GroupCreate(StoreGroupCreateRequest) returns (StoreGroupCreateResponse);
+    // Group 加群，退出，邀请，踢人
+    rpc Group(StoreGroupRequest) returns (StoreGroupResponse);
+    // GroupDelete 解散群, 要检测用户是不是群主
+    rpc GroupDelete(StoreGroupDeleteRequest) returns (StoreGroupDeleteResponse);
+
+    // LoadGroupList 加载群组列表
+    rpc LoadGroupList(StoreLoadGroupListRequest) returns (StoreLoadGroupListResponse);
+
+    rpc NewMessage(StoreNewMessageRequest) returns (StoreNewMessageResponse);
+
+    // UploadFile 上传文件接口，一次一个文件.
+    rpc UploadFile (StoreUploadFileRequest) returns (StoreUploadFileResponse);
+    // CheckFile 检测文件是否存在，文件的MD5, 服务器返回不存在的文件MD5.
+    rpc CheckFile (StoreCheckFileRequest) returns (StoreCheckFileResponse);
+    // DownloadFile 下载文件，传入文件MD5，返回具体文件内容.
+    rpc DownloadFile (StoreDownloadFileRequest) returns (StoreDownloadFileResponse);
+
+    // ID 参照消息ID，每次可逆序(旧消息)或正序(新消息)接收100条
+    // 如果ID为0，就逆序返回旧的100条消息
+    rpc LoadMessage (StoreLoadMessageRequest) returns (StoreLoadMessageResponse);
+
+}
+
+
+message StoreFindUserRequest {
+    RequestHeader   header  = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    string          Name    = 2;
+}
+
+message StoreFindUserResponse {
+    ResponseHeader header = 1;
+    repeated string Users = 2;
+}
+
+message StoreFriendRequest {
+    RequestHeader   header  = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    Relation        Operate = 2;
+    int64           From    = 3;
+    int64           To      = 4;
+    string          Msg     = 5;
+}
+
+message StoreFriendResponse {
+    ResponseHeader header = 1;
+}
+
+message StoreRegisterRequest {
+    int64   ID      = 1;
+    string  User    = 2;
+    string  Password= 3;
+}
+
+message StoreRegisterResponse {
+    ResponseHeader header = 1;
+}
+
+message StoreUpdateUserInfoRequest {
+    RequestHeader   header      = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    string          Name        = 2;
+    string          NickName    = 3;
+    string          Avatar      = 4;
+}
+
+message StoreUpdateUserInfoResponse {
+    ResponseHeader header = 1;
+}
+
+message StoreUpdateUserPasswordRequest {
+    RequestHeader   header      = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    string          Name        = 2;
+    string          Password    = 3;
+    string          NewPassword = 4;
+}
+
+message StoreUpdateUserPasswordResponse {
+    ResponseHeader header = 1;
+}
+
+message StoreGetUserInfoRequest {
+    RequestHeader   header  = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    bool            ByName  = 2;
+    string          Name    = 3;
+    int64           ID      = 4;
+}
+
+message StoreGetUserInfoResponse {
+    ResponseHeader  header      = 1;
+    int64           ID          = 2;
+    string          User        = 3;
+    string          NickName    = 4;
+    string          Avatar      = 5;
+    string          Signature   = 6;
+}
+
+message StoreAuthRequest {
+    string User = 1;
+    string Password = 2;
+}
+
+message StoreAuthResponse {
+    ResponseHeader  header  = 1;
+    int64           ID      = 2;
+}
+
+message StoreGroupCreateRequest {
+    RequestHeader   header  = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    int64           ID      = 2;
+    string          Name    = 3;
+}
+
+message StoreGroupCreateResponse {
+    ResponseHeader header = 1;
+}
+
+/*
+   StoreGroupRequest
+   ID 群ID
+   User 当前操作用户ID
+   Operate 具体操作
+   Msg 附加消息
+   Users 对应的用户ID，如T哪些用户
+ */
+message StoreGroupRequest {
+    RequestHeader   header  = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    int64           ID      = 2;
+    Relation        Operate = 3;
+    string          Msg     = 4;
+    repeated int64  Users   = 5;
+}
+
+message StoreGroupResponse {
+    ResponseHeader header = 1;
+}
+
+message StoreGroupDeleteRequest {
+    RequestHeader   header  = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    int64           ID      = 2;
+}
+
+message StoreGroupDeleteResponse {
+    ResponseHeader header = 1;
+}
+
+message StoreNewMessageRequest {
+    RequestHeader   header  = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    Message         Msg     = 2 [(gogoproto.nullable) = false];
+}
+
+message StoreNewMessageResponse {
+    ResponseHeader header = 1;
+}
+
+message StoreUploadFileRequest {
+    RequestHeader   header  = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    bytes           File    = 2;
+}
+
+message StoreUploadFileResponse {
+    ResponseHeader header = 1;
+}
+
+message StoreCheckFileRequest {
+    RequestHeader   header  = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    repeated string Names   = 2;
+}
+
+message StoreCheckFileResponse {
+    ResponseHeader header = 1;
+    repeated string Names = 2;
+}
+
+
+message StoreDownloadFileRequest {
+    RequestHeader   header  = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    repeated string Names   = 2;
+}
+
+message StoreDownloadFileResponse {
+    ResponseHeader      header  = 1;
+    map<string, bytes>  Files   = 2;
+}
+
+
+message StoreLoadMessageRequest {
+    RequestHeader   header  = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    int64           ID      = 2;
+    bool            Reverse = 3;
+}
+
+
+message StoreLoadMessageResponse {
+    ResponseHeader          header  = 1;
+    repeated PushMessage    Msgs    = 2;
+}
+
+message StoreLoadGroupListRequest {
+    RequestHeader   header = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+}
+
+message StoreLoadGroupListResponse {
+    ResponseHeader header = 1;
+    repeated GroupInfo groups = 2;
+}
+
+message StoreLoadFriendListRequest {
+    RequestHeader   header = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+}
+
+message StoreLoadFriendListResponse {
+    ResponseHeader header   = 1;
+    repeated int64 users    = 2;
+}
+
+message StoreUpdateSignatureRequest {
+    RequestHeader   header      = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    string          Name        = 2;
+    string          Signature   = 3;
+}
+
+message StoreUpdateSignatureResponse {
+    ResponseHeader header   = 1;
+}
+
